@@ -1,0 +1,11 @@
+# SQLiteExplorer - Requirements
+# Zero external dependencies!
+# Uses only Python standard library:
+#   - sqlite3 (database access)
+#   - argparse (CLI parsing)
+#   - json (JSON formatting)
+#   - csv (CSV export)
+#   - pathlib (cross-platform paths)
+#   - textwrap (text formatting)
+#   - shutil (terminal size detection)
+#   - io (string I/O for CSV)

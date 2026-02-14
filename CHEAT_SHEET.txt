@@ -1,0 +1,225 @@
+================================================================================
+SQLITEEXPLORER CHEAT SHEET v1.0.0
+================================================================================
+
+QUICK START
+-----------
+1. Clone: git clone https://github.com/DonkRonk17/SQLiteExplorer.git
+2. Verify: python sqliteexplorer.py --version
+3. Try:    python sqliteexplorer.py info your_database.db
+
+================================================================================
+ALL COMMANDS AT A GLANCE
+--------------------------------------------------------------------------------
+
+  info     <db>                 Database metadata and overview
+  tables   <db>                 List all tables with row counts
+  schema   <db> [table]         Show table schema (all or specific)
+  browse   <db> <table>         Browse table data with pagination
+  query    <db> <sql>           Execute any SQL query
+  export   <db> <table>         Export data to CSV/JSON/Markdown
+  stats    <db> <table>         Column statistics (min/max/avg/nulls)
+  search   <db> <term>          Search across all tables
+  size     <db>                 Detailed size analysis
+  diff     <db1> <db2>          Compare two database schemas
+  vacuum   <db> --confirm       Optimize database (requires --confirm)
+
+================================================================================
+COMMAND DETAILS
+--------------------------------------------------------------------------------
+
+INFO:
+  python sqliteexplorer.py info mydata.db
+  python sqliteexplorer.py info mydata.db --format json
+
+TABLES:
+  python sqliteexplorer.py tables mydata.db
+  python sqliteexplorer.py tables mydata.db --format json
+  python sqliteexplorer.py tables mydata.db --format md
+
+SCHEMA:
+  python sqliteexplorer.py schema mydata.db              (all tables)
+  python sqliteexplorer.py schema mydata.db users         (single table)
+  python sqliteexplorer.py schema mydata.db --format json
+
+BROWSE:
+  python sqliteexplorer.py browse mydata.db users
+  python sqliteexplorer.py browse mydata.db users --limit 10
+  python sqliteexplorer.py browse mydata.db users --limit 10 --offset 20
+  python sqliteexplorer.py browse mydata.db users --where "age > 25"
+  python sqliteexplorer.py browse mydata.db users --order-by "name ASC"
+  python sqliteexplorer.py browse mydata.db users --format json
+
+QUERY:
+  python sqliteexplorer.py query mydata.db "SELECT * FROM users"
+  python sqliteexplorer.py query mydata.db "SELECT COUNT(*) FROM users"
+  python sqliteexplorer.py query mydata.db "SELECT u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id"
+  python sqliteexplorer.py query mydata.db "SELECT * FROM users" --format json
+
+EXPORT:
+  python sqliteexplorer.py export mydata.db users                           (CSV to stdout)
+  python sqliteexplorer.py export mydata.db users --format csv -o users.csv (CSV to file)
+  python sqliteexplorer.py export mydata.db users --format json -o users.json
+  python sqliteexplorer.py export mydata.db users --format md
+  python sqliteexplorer.py export mydata.db users --query "SELECT * FROM users WHERE active=1" --format json
+
+STATS:
+  python sqliteexplorer.py stats mydata.db users
+  python sqliteexplorer.py stats mydata.db users --format json
+  python sqliteexplorer.py stats mydata.db products --format md
+
+SEARCH:
+  python sqliteexplorer.py search mydata.db "admin"
+  python sqliteexplorer.py search mydata.db "error" --tables logs,alerts
+  python sqliteexplorer.py search mydata.db "test" --limit 5
+  python sqliteexplorer.py search mydata.db "data" --format json
+
+SIZE:
+  python sqliteexplorer.py size mydata.db
+  python sqliteexplorer.py size mydata.db --format json
+
+DIFF:
+  python sqliteexplorer.py diff dev.db prod.db
+  python sqliteexplorer.py diff dev.db prod.db --format json
+
+VACUUM:
+  python sqliteexplorer.py vacuum mydata.db               (preview only)
+  python sqliteexplorer.py vacuum mydata.db --confirm      (actually vacuum)
+
+================================================================================
+OUTPUT FORMAT OPTIONS
+--------------------------------------------------------------------------------
+
+  --format text    Default terminal output (aligned columns)
+  --format json    Machine-readable JSON
+  --format csv     Comma-separated values (export only)
+  --format md      GitHub-flavored Markdown table
+
+Not all formats available for all commands. Check --help for each.
+
+================================================================================
+PYTHON API
+--------------------------------------------------------------------------------
+
+Import:
+  from sqliteexplorer import SQLiteExplorer
+
+Basic Usage:
+  db = SQLiteExplorer("mydata.db")
+  info = db.get_info()
+  tables = db.get_tables()
+  schema = db.get_schema("users")
+  result = db.browse("users", limit=10)
+  result = db.query("SELECT * FROM users")
+  content = db.export_table("users", fmt="json", output="users.json")
+  stats = db.get_stats("users")
+  matches = db.search("admin")
+  size = db.get_size()
+  diff = db.diff("other.db")
+  result = db.vacuum()
+  db.close()
+
+Context Manager (Recommended):
+  with SQLiteExplorer("mydata.db") as db:
+      tables = db.get_tables()
+      for t in tables:
+          print(f"{t['name']}: {t['row_count']} rows")
+
+================================================================================
+COMMON WORKFLOWS
+--------------------------------------------------------------------------------
+
+Quick Database Overview:
+  python sqliteexplorer.py info db   &&   python sqliteexplorer.py tables db
+
+Inspect and Export:
+  python sqliteexplorer.py schema db users
+  python sqliteexplorer.py browse db users --limit 5
+  python sqliteexplorer.py export db users --format json -o users.json
+
+Find Data:
+  python sqliteexplorer.py search db "keyword"
+
+Data Quality Check:
+  python sqliteexplorer.py stats db tablename
+
+Compare Environments:
+  python sqliteexplorer.py diff dev.db prod.db
+
+Optimize Storage:
+  python sqliteexplorer.py size db
+  python sqliteexplorer.py vacuum db --confirm
+
+================================================================================
+SPECIAL VALUES IN OUTPUT
+--------------------------------------------------------------------------------
+
+  NULL           Displayed for SQL NULL values
+  <BLOB N bytes> Displayed for binary data
+  ...            Indicates truncated long values
+  <<             In search results, marks the matched column
+
+================================================================================
+ERROR CODES
+--------------------------------------------------------------------------------
+
+  0    Success
+  1    Error (file not found, SQL error, permission denied)
+  130  Interrupted (Ctrl+C)
+
+================================================================================
+INTEGRATION WITH TEAM BRAIN TOOLS
+--------------------------------------------------------------------------------
+
+With AgentHeartbeat:
+  python sqliteexplorer.py browse heartbeat.db heartbeats --limit 10
+
+With BatchRunner:
+  python batchrunner.py run "sqliteexplorer.py tables {db}" --input *.db
+
+With SynapseLink:
+  from synapselink import quick_send
+  from sqliteexplorer import SQLiteExplorer
+  db = SQLiteExplorer("heartbeat.db")
+  info = db.get_info()
+  quick_send("TEAM", "DB Health", f"Tables: {info['table_count']}")
+
+================================================================================
+TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+"File not found"
+  -> Check the database path is correct
+  -> Use absolute paths if running from a different directory
+
+"Database is locked"
+  -> Another process has the database open for writing
+  -> Close other applications and retry
+
+"Not a database"
+  -> The file is not a valid SQLite database
+  -> Check the file is not corrupted
+
+Encoding errors on Windows
+  -> SQLiteExplorer uses ASCII-safe output
+  -> Ensure terminal supports UTF-8 if needed
+
+Slow on large tables
+  -> Use --limit to page through data
+  -> Use --where to filter before fetching
+
+================================================================================
+RESOURCES
+--------------------------------------------------------------------------------
+
+Documentation:  SQLiteExplorer/README.md
+Examples:       SQLiteExplorer/EXAMPLES.md
+Integration:    SQLiteExplorer/INTEGRATION_PLAN.md
+Quick Starts:   SQLiteExplorer/QUICK_START_GUIDES.md
+GitHub:         https://github.com/DonkRonk17/SQLiteExplorer
+Issues:         https://github.com/DonkRonk17/SQLiteExplorer/issues
+
+================================================================================
+Built by ATLAS (Team Brain) for Logan Smith / Metaphy LLC
+February 14, 2026 | Zero Dependencies | 100 Tests | MIT License
+================================================================================
