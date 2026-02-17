@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d3a28818-f284-415c-a8e3-a3450a988cb9" />
+
 # 🔍 SQLiteExplorer
 
 ### Smart SQLite Database Explorer & Management Tool
@@ -585,6 +587,9 @@ See [INTEGRATION_EXAMPLES.md](INTEGRATION_EXAMPLES.md) for copy-paste code examp
 - Stats and search may take longer on tables with 100K+ rows
 
 ---
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/5a0c17ae-e5fc-4ef9-a74e-198c3d6d3d4b" />
+
 
 ## 🤝 Contributing
 
